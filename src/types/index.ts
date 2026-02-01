@@ -1,2 +1,5 @@
-export type SpeedUnit = "Kbps" | "Mbps" | "Gbps" | "KB/s" | "MB/s" | "GB/s";
-export type SizeUnit = "KB" | "MB" | "GB" | "TB";
+export type DataUnit = 
+"Kbit" | "KB" |
+"Mbit" | "MB" |
+"Gbit" | "GB" |
+"Tbit" | "TB";

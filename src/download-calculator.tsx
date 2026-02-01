@@ -1,15 +1,20 @@
 import { useState } from 'react'
-import type { SpeedUnit, SizeUnit } from './types';
+import type { DataUnit } from './types';
 
 interface Speed {
     value: number | null,
-    unit: SpeedUnit
+    unit: DataUnit
+}
+
+interface Size {
+    value: number | null,
+    unit: DataUnit
 }
 
 export default function DownloadCalculator() {
-    const sizeUnits: SizeUnit[] = ["KB", "MB", "GB", "TB"];
+    const sizeUnits: DataUnit[] = ["KB", "MB", "GB", "TB"];
     const defaultSizeUnit = sizeUnits[2];
-    const speedUnits: SpeedUnit[] = ["Kbps", "Mbps", "Gbps", "KB/s", "MB/s", "GB/s"];
+    const speedUnits: DataUnit[] = ["Kbit", "Mbit", "Gbit", "KB", "MB", "GB"];
     const defaultSpeedUnit = speedUnits[1];
 
     const [speed, setSpeed] = useState<Speed>({ value: null, unit: defaultSpeedUnit});
@@ -28,7 +33,7 @@ export default function DownloadCalculator() {
 
 interface SpeedInputProps {
     speed: Speed,
-    units: SpeedUnit[],
+    units: DataUnit[],
     onChange: (newSpeed: Speed) => void
 }
 
@@ -38,7 +43,7 @@ function SpeedInput({ speed, units, onChange }: SpeedInputProps) {
     function handleUnitChange(e: React.ChangeEvent<HTMLSelectElement>) {
         onChange({
             ...speed, 
-            unit: e.target.value as SpeedUnit
+            unit: e.target.value as DataUnit
         });
     }
 
@@ -57,7 +62,7 @@ function SpeedInput({ speed, units, onChange }: SpeedInputProps) {
                 aria-label="Download speed unit"
                 value={speed.unit}
                 onChange={handleUnitChange}>
-                {units.map((unit) => <option key={unit}>{unit}</option>)}
+                {units.map((unit) => <option key={unit} value={unit}>{unit + '/s'}</option>)}
             </select>
         </div>
     )
@@ -65,13 +70,8 @@ function SpeedInput({ speed, units, onChange }: SpeedInputProps) {
 
 interface SizeInputProps {
     size: Size,
-    units: SizeUnit[],
+    units: DataUnit[],
     onChange: (newSize: Size) => void
-}
-
-interface Size {
-    value: number | null,
-    unit: SizeUnit
 }
 
 function SizeInput({ size, units, onChange }: SizeInputProps) {
@@ -80,7 +80,7 @@ function SizeInput({ size, units, onChange }: SizeInputProps) {
     function handleUnitChange(e: React.ChangeEvent<HTMLSelectElement>) {
         onChange({
             ...size,
-            unit: e.target.value as SizeUnit
+            unit: e.target.value as DataUnit
         });
     }
 
@@ -99,7 +99,7 @@ function SizeInput({ size, units, onChange }: SizeInputProps) {
                 aria-label="Download size unit"
                 value={size.unit}
                 onChange={handleUnitChange}>
-                {units.map((unit) => <option key={unit}>{unit}</option>)}
+                {units.map((unit) => <option key={unit} value={unit}>{unit}</option>)}
             </select>
         </div>
     );
@@ -120,20 +120,19 @@ function calculateSeconds(speed: Speed, size: Size)
     return bytesSize / bytesSpeed;
 }
 
-const baseUnitToBytes: Record<string, number> = {
-    "Kb": 128,
+const baseUnitToBytes: Record<DataUnit, number> = {
+    "Kbit": 128,
     "KB": 1024,
-    "Mb": 131072,
+    "Mbit": 131072,
     "MB": 1048576,
-    "Gb": 134217728,
+    "Gbit": 134217728,
     "GB": 1073741824,
-    "Tb": 137438953472,
+    "Tbit": 137438953472,
     "TB": 1099511627776
 };
 
-function mapToBytes(unit: SpeedUnit | SizeUnit): number {
-    const baseUnit = unit.substring(0, 2);
-    return baseUnitToBytes[baseUnit];
+function mapToBytes(unit: DataUnit): number {
+    return baseUnitToBytes[unit];
 }
 
 function secondsToTime(seconds: number) {
